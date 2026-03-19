@@ -22,7 +22,8 @@ export const FirebasePaymentModal: React.FC<FirebasePaymentModalProps> = ({
   onPaymentComplete
 }) => {
   const { cart, getTotalPrice, clearCart } = useCart();
-  const [paymentStep, setPaymentStep] = useState<'summary' | 'confirm' | 'success'>('summary');
+  const [paymentStep, setPaymentStep] = useState<'summary' | 'confirm' | 'payment' | 'success'>('summary');
+  const [copied, setCopied] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderId, setOrderId] = useState('');
 
@@ -52,9 +53,10 @@ export const FirebasePaymentModal: React.FC<FirebasePaymentModalProps> = ({
           category: item.category
         })),
         totalAmount: totalAmount,
-        status: 'confirmed', // Auto-confirm for free orders
-        paymentMethod: 'free',
-        paymentStatus: 'completed', // Auto-complete for free orders
+        total: totalAmount,
+        status: 'pending' as const, // Auto-confirm for free orders
+        paymentMethod: 'upi' as const,
+        paymentStatus: 'completed' as const, // Auto-complete for free orders
         createdAt: new Date().toISOString(),
         orderId: newOrderId
       };
@@ -90,7 +92,7 @@ export const FirebasePaymentModal: React.FC<FirebasePaymentModalProps> = ({
       await orderService.updateOrderStatus(orderId, 'preparing');
 
       setPaymentStep('success');
-      
+
       // Clear cart after successful payment
       setTimeout(() => {
         clearCart();
@@ -128,7 +130,7 @@ export const FirebasePaymentModal: React.FC<FirebasePaymentModalProps> = ({
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
             onClick={onClose}
           />
-          
+
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -195,10 +197,10 @@ export const FirebasePaymentModal: React.FC<FirebasePaymentModalProps> = ({
                           <div className="flex items-center space-x-3">
                             <span className="text-2xl">
                               {item.name.includes('Punugulu') ? '🍘' :
-                               item.name.includes('Dosa') ? '🥞' :
-                               item.name.includes('Idly') ? '🍙' :
-                               item.name.includes('Vada') ? '🧇' :
-                               item.name.includes('Garelu') ? '🥮' : '🍽️'}
+                                item.name.includes('Dosa') ? '🥞' :
+                                  item.name.includes('Idly') ? '🍙' :
+                                    item.name.includes('Vada') ? '🧇' :
+                                      item.name.includes('Garelu') ? '🥮' : '🍽️'}
                             </span>
                             <div>
                               <p className="font-medium text-gray-800">{item.name}</p>
@@ -340,7 +342,7 @@ export const FirebasePaymentModal: React.FC<FirebasePaymentModalProps> = ({
                     <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto">
                       <Check className="w-10 h-10 text-white" />
                     </div>
-                    
+
                     <div>
                       <h3 className="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h3>
                       <p className="text-gray-600 mb-4">
@@ -360,7 +362,7 @@ export const FirebasePaymentModal: React.FC<FirebasePaymentModalProps> = ({
                           <p className="text-sm text-gray-600">20-30 minutes</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                         <User className="w-5 h-5 text-emerald-500" />
                         <div>
